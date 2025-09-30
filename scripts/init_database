@@ -1,0 +1,12 @@
+
+CREATE DATABASE DataWarehouse;
+GO
+
+-- Create Schema
+
+CREATE SCHEMA Brozne;
+GO
+CREATE SCHEMA Silver;
+GO
+CREATE SCHEMA Gold;
+GO
