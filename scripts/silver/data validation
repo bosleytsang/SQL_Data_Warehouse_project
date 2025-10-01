@@ -1,0 +1,73 @@
+select * FROM silver.erp_cust_az12;
+select distinct 
+    gen ,
+    CASE WHEN UPPER(TRIM(gen)) in ('F', 'FEMALE') THEN 'Female'
+        WHEN UPPER(TRIM(gen)) in ('M', 'MALE' ) THEN 'Male'
+        ELSE 'n/a' END AS gen_cleaned
+from bronze.erp_cust_az12;
+
+-- Check Date Format Issues
+  SELECT 
+    NULLIF(sls_order_dt,0) AS sls_order_dt
+  FROM bronze.crm_sales_details
+  WHERE sls_order_dt <= 0 or LEN(sls_order_dt) != 8 ;
+
+-- Check Invalid Date Order 
+  SELECT *
+  FROM bronze.crm_sales_details
+  WHERE (sls_order_dt  > sls_ship_dt  or sls_order_dt > sls_due_dt)
+  
+  select * FROM silver.crm_sales_details;
+
+
+-- Data Quality Check
+--  Check for prd_start_dt should not be greater than prd_end_dt
+    SELECT prd_id,
+    prd_start_dt,
+    prd_end_dt
+    FROM silver.crm_prd_info
+    where prd_start_dt > prd_end_dt
+    ;
+
+--  Check for null values or duplicates in primary key 
+    SELECT prd_id,
+    count(*)
+    FROM silver.crm_prd_info
+    GROUP BY prd_id
+    HAVING count(*) > 1 OR prd_id IS NULL;
+
+-- Check Unwanted Spaces
+    SELECT prd_name
+    FROM silver.crm_prd_info
+    WHERE prd_name != TRIM(prd_name);
+
+-- Check for nulls or negaitve values in prd_cost
+    SELECT prd_cost
+    FROM silver.crm_prd_info
+    WHERE prd_cost IS NULL OR prd_cost < 0;
+
+-- Check Standarization of prd_line
+    SELECT DISTINCT prd_line
+    FROM silver.crm_prd_info;
+
+SELECT * FROM silver.crm_prd_info
+
+
+-- Check Null or Duplicates in Primary Key
+-- Expectation: No returns
+    SELECT 
+    cst_id,
+    COUNT(*)  
+    FROM silver.crm_cust_info
+    GROUP BY cst_id
+    HAVING COUNT(*) > 1 OR cst_id is NULL
+    ;
+
+-- Check for unwanted Spaces
+-- Expectation: No returns
+    SELECT cst_firstname, cst_lastname
+    FROM silver.crm_cust_info
+    WHERE cst_firstname != TRIM(cst_firstname) OR cst_lastname != TRIM(cst_lastname);
+
+SELECT DISTINCT cst_gndr
+FROM silver.crm_cust_info;
