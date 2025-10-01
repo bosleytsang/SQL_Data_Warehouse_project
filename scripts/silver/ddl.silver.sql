@@ -182,15 +182,20 @@ FROM  bronze.erp_cust_az12;
 
 TRUNCATE TABLE silver.erp_loc_a101;
 PRINT 'Inserting data into silver.erp_loc_a101';
-INSERT into silver.erp_loc_a101 (cid,cntry)
-select 
-    REPLACE(cid,'-','') as cid,
-    case when trim(cntry) = 'DE' then 'Germany'
-         when trim(cntry) in ('US','USA') then 'United States'
-         when trim(cntry)= '' or cntry is null then 'n/a'
-         else trim(cntry)
-    end as cntry
-from bronze.erp_loc_a101 ;
+INSERT INTO silver.erp_loc_a101 (cid, cntry)
+SELECT 
+    REPLACE(cid, '-', '') AS cid,
+    CASE 
+        WHEN UPPER(LTRIM(RTRIM(REPLACE(cntry, CHAR(13), '')))) = 'DE' 
+            THEN 'Germany'
+        WHEN UPPER(LTRIM(RTRIM(REPLACE(cntry, CHAR(13), '')))) IN ('US','USA') 
+            THEN 'United States'
+        WHEN LTRIM(RTRIM(REPLACE(cntry, CHAR(13), ''))) = '' OR cntry IS NULL 
+            THEN 'n/a'
+        ELSE LTRIM(RTRIM(REPLACE(cntry, CHAR(13), '')))
+    END AS cntry
+FROM bronze.erp_loc_a101;
+
 
 TRUNCATE TABLE silver.erp_px_cat_g1v2;
 PRINT 'Inserting data into silver.erp_px_cat_g1v2';
