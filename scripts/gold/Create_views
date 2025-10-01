@@ -1,0 +1,35 @@
+CREATE VIEW gold.dim_customers AS
+SELECT 
+    ci.cst_id as customer_id,
+    ci.cst_key as customer_name,
+    ci.cst_firstname as first_name,
+    ci.cst_lastname as last_name,
+    ci.cst_marital_status as marital_status,
+    ci.cst_gndr as gender,
+    ci.cst_create_date as create_date,
+    ca.bdate as birthdate,
+    la.cntry as country
+FROM silver.crm_cust_info AS ci
+left join silver.erp_cust_az12 AS ca
+    ON ci.cst_key = ca.cid
+left join silver.erp_loc_a101 la
+    ON ci.cst_key = la.cid;
+
+
+CREATE VIEW gold.fact_sales AS
+SELECT 
+    sd.sls_ord_num as order_number,
+    pr.product_id as product_key,
+    cu.customer_id as customer_key,
+    sd.sls_order_dt as order_date,
+    sd.sls_ship_dt as shipping_date,
+    sd.sls_due_dt as due_date,
+    sd.sls_sales as sales,
+    sd.sls_quantity as quantity,
+    sd.sls_price as price 
+FROM silver.crm_sales_details AS sd
+LEFT JOIN gold.dim_products AS pr
+ON sd.sls_prd_key = pr.prduct_number 
+LEFT join gold.dim_customers AS cu
+ON sd.sls_cust_id = cu.customer_id
+
