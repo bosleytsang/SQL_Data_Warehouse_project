@@ -1,35 +1,68 @@
+CDROP VIEW gold.dim_customers;
+GO
 CREATE VIEW gold.dim_customers AS
-SELECT 
-    ci.cst_id as customer_id,
-    ci.cst_key as customer_name,
-    ci.cst_firstname as first_name,
-    ci.cst_lastname as last_name,
-    ci.cst_marital_status as marital_status,
-    ci.cst_gndr as gender,
-    ci.cst_create_date as create_date,
-    ca.bdate as birthdate,
-    la.cntry as country
+    SELECT 
+        ROW_NUMBER() over  (order by cst_id) as customer_key,
+        ci.cst_id as customer_id,
+        ci.cst_key as customer_name,
+        ci.cst_firstname as first_name,
+        ci.cst_lastname as last_name,
+        ci.cst_marital_status as marital_status,
+        ci.cst_gndr as gender,
+        ci.cst_create_date as create_date,
+        ca.bdate as birthdate,
+        la.cntry as country
 FROM silver.crm_cust_info AS ci
 left join silver.erp_cust_az12 AS ca
     ON ci.cst_key = ca.cid
 left join silver.erp_loc_a101 la
     ON ci.cst_key = la.cid;
+GO
 
+SELECT * FROM gold.dim_customers;
+
+DROP VIEW gold.dim_products;
+GO
+CREATE VIEW gold.dim_products AS
+    SELECT 
+        ROW_NUMBER() over  (order by pn.prd_start_dt, prd_key) as product_key,
+        pn.prd_id as product_id,
+        pn.cat_id as category_id,
+        pn.prd_key as product_number,
+        pn.prd_name as product_name,
+        pn.prd_cost as cost,
+        pn.prd_line as product_line,
+        pn.prd_start_dt as [start date],
+        pc.cat as category,
+        pc.subcat as subcategory,
+        pc.maintenance
+FROM silver.crm_prd_info AS pn
+LEFT JOIN silver.erp_px_cat_g1v2 AS pc
+ON pn.cat_id = pc.id
+WHERE prd_end_dt is NULL
+GO
+
+SELECT * FROM gold.dim_products;
+GO
+
+DROP VIEW  gold.fact_sales; 
+GO
 
 CREATE VIEW gold.fact_sales AS
-SELECT 
-    sd.sls_ord_num as order_number,
-    pr.product_id as product_key,
-    cu.customer_id as customer_key,
-    sd.sls_order_dt as order_date,
-    sd.sls_ship_dt as shipping_date,
-    sd.sls_due_dt as due_date,
-    sd.sls_sales as sales,
-    sd.sls_quantity as quantity,
-    sd.sls_price as price 
+    SELECT 
+        sd.sls_ord_num as order_number,
+        pr.product_key,
+        cu.customer_key,
+        sd.sls_order_dt as order_date,
+        sd.sls_ship_dt as shipping_date,
+        sd.sls_due_dt as due_date,
+        sd.sls_sales as sales,
+        sd.sls_quantity as quantity,
+        sd.sls_price as price 
 FROM silver.crm_sales_details AS sd
 LEFT JOIN gold.dim_products AS pr
-ON sd.sls_prd_key = pr.prduct_number 
+ON sd.sls_prd_key = pr.product_number 
 LEFT join gold.dim_customers AS cu
 ON sd.sls_cust_id = cu.customer_id
-
+GO
+SELECT * FROM gold.fact_sales;
