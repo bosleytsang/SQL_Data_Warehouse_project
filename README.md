@@ -1,4 +1,9 @@
 # Data Warehouse Project and Analytics
+Developed and implemented a data warehouse solution to transform raw operational data into business-ready datasets for analytics and reporting.
+Designed and optimized SQL-based ETL (Extract, Transform, Load) processes to integrate data from csv files. 
+Enabled data-driven decision-making by delivering clean, structured, and query-efficient data to analytics.
+
+
 The data architecture include bronze, silver & gold layer.
 <img width="1264" height="599" alt="Image" src="https://github.com/user-attachments/assets/4632ce27-12c9-4056-8144-c87da2e604b4" />
 1. Bronze Layer: Store raw data. Data is ingested from CSv Files into SQL Server Databases.
