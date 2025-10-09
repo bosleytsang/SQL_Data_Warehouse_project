@@ -1,4 +1,6 @@
-CDROP VIEW gold.dim_customers;
+
+
+DROP VIEW gold.dim_customers;
 GO
 CREATE VIEW gold.dim_customers AS
     SELECT 
